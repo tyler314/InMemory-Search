@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Python environment artifacts
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# PyCharm project settings
+.idea/
+
+# VSCode settings
+.vscode/
+
+# Test artifacts
+.pytest_cache/
+.tox/
+coverage/
+htmlcov/
+*.cover
+*.coverage
+coverage.xml
+nosetests.xml
+
+# mypy, pylint, pytype
+.mypy_cache/
+.pytype/
+pylint-report.txt
+pylint-global.txt
+
+# Environment variable files
+.env
+.env.*
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# System/OS files
+.DS_Store
+Thumbs.db
