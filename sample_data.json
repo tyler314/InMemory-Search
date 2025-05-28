@@ -1,0 +1,22 @@
+[
+  {
+    "doc_id": "spam1",
+    "content": "Spam spam spam spam. Lovely spam! Wonderful spam!"
+  },
+  {
+    "doc_id": "eggs2",
+    "content": "I would like some eggs with my spam, please."
+  },
+  {
+    "doc_id": "parrot3",
+    "content": "This parrot is no more! It has ceased to be!"
+  },
+  {
+    "doc_id": "ni4",
+    "content": "We are the knights who say Ni!"
+  },
+  {
+    "doc_id": "shrubbery5",
+    "content": "You must bring us... a shrubbery!"
+  }
+]

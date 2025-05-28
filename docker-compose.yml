@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  inmemory-db-app:
+    build: .
+    ports:
+      - "8000:8000" # Expose port 5000
