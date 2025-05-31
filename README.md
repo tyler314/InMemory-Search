@@ -63,6 +63,29 @@ curl "http://localhost:8000/search?keyword=spam"
 }
 ```
 
+## 5. Fuzzy Search (New Feature)
+
+The /search endpoint now supports fuzzy matching using the RapidFuzz library. This allows approximate keyword matches using the fuzzy query parameter.
+
+Usage:
+```bash
+curl "http://localhost:8000/search?keyword=parot&fuzzy=true"
+```
+- keyword: The search string
+- fuzzy (optional): Set to "on" to enable fuzzy matching, or "off" for exact substring match (default: off)
+
+Example Response:
+```bash
+{
+  "status": 200,
+  "total": 1,
+  "document_ids": ["parrot3"]
+}
+```
+Notes:
+- Fuzzy search uses partial_ratio from RapidFuzz with a configurable threshold (default is 50).
+- You can adjust the threshold inside InMemoryDB if needed.
+
 ### Design Choices
 My main design choices revolved around the InMemoryDB class. I decided to make it a singleton, mostly to show that there should only be one instance of this database running at any time, since it's the central in-memory store.
 
