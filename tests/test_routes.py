@@ -2,6 +2,7 @@ import pytest
 from app.db import InMemoryDB
 from fastapi.testclient import TestClient
 from app.main import app
+from app.models import Document
 
 client = TestClient(app)
 
@@ -117,3 +118,58 @@ class TestSearchDocuments:
         result = client.get("/search?keyword=baseball").json()
         assert "wordtest" in result["document_ids"]
         assert "shouldskip" not in result["document_ids"]
+
+
+class TestFuzzySearch:
+    def setup_method(self):
+        db = InMemoryDB(partial_ratio_threshold=50)
+        db.clear()
+        db["spam1"] = Document(
+            content="Spam spam spam spam. Lovely spam! Wonderful spam!"
+        )
+        db["eggs2"] = Document(content="I would like some eggs with my spam, please.")
+        db["parrot3"] = Document(
+            content="This parrot is no more! It has ceased to be in the light!"
+        )
+        db["ni4"] = Document(content="We are the knights who say Ni!")
+        db["shrubbery5"] = Document(content="You must bring us... a shrubbery!")
+        db["rabbit"] = Document(content="Run, run away! It comes out at night")
+
+    def test_search_exact_match(self):
+        response = client.get("/search?keyword=parrot")
+        assert response.status_code == 200
+        data = response.json()
+        assert "parrot3" in data["document_ids"]
+
+    def test_search_fuzzy_match(self):
+        response = client.get("/search?keyword=night&fuzzy=on")
+        assert response.status_code == 200
+        data = response.json()
+        for key in ("ni4", "rabbit", "parrot3"):
+            assert key in data["document_ids"]
+
+    def test_search_fuzzy_off(self):
+        response = client.get("/search?keyword=night&fuzzy=off")
+        assert response.status_code == 200
+        data = response.json()
+        for key in ("ni4", "parrot3"):
+            assert key not in data["document_ids"]
+
+    def test_change_threshold(self):
+        partial_key_matches = ("ni4", "rabbit", "parrot3")
+        keyword_search = "ighlt"
+
+        # 50% Threshold (From setup_method)
+        response = client.get(f"/search?keyword={keyword_search}&fuzzy=on")
+        assert response.status_code == 200
+        data = response.json()
+        for key in partial_key_matches:
+            assert key in data["document_ids"]
+
+        # 50% Threshold (From setup_method)
+        InMemoryDB(partial_ratio_threshold=95)
+        response = client.get(f"/search?keyword={keyword_search}&fuzzy=on")
+        assert response.status_code == 200
+        data = response.json()
+        for key in partial_key_matches:
+            assert key not in data["document_ids"]

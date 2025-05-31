@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
-from typing import List, Dict, Set, Any
+from rapidfuzz import fuzz
+from typing import List, Any
 from app.models import Document
 
 
@@ -13,7 +14,7 @@ class InMemoryDB(dict):
             return []
         return re.findall(r"\w+", document.content.lower())
 
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._deleted_documents = dict()
@@ -25,6 +26,9 @@ class InMemoryDB(dict):
             self._remove_from_inverted_index(doc_id)
         self._add_to_inverted_index(doc_id, document)
         super().__setitem__(doc_id, document)
+
+    def __init__(self, partial_ratio_threshold: int = 100):
+        self.partial_ratio_threshold = partial_ratio_threshold
 
     def _add_to_inverted_index(self, doc_id: str, document: Document) -> None:
         token = InMemoryDB.tokenize(document)
@@ -45,7 +49,16 @@ class InMemoryDB(dict):
     def get_deleted_uids(self) -> List[str]:
         return list(self._deleted_documents.keys())
 
-    def get_doc_ids_by_keyword(self, keyword: str) -> List[str]:
+    def get_doc_ids_by_keyword(self, keyword: str, fuzzy: bool = False) -> List[str]:
+        if fuzzy:
+            doc_ids = []
+            for doc_id, document in self.items():
+                if (
+                    fuzz.partial_ratio(document.content.lower(), keyword.lower())
+                    >= self.partial_ratio_threshold
+                ):
+                    doc_ids.append(doc_id)
+            return doc_ids
         return list(self._inverted_index.get(keyword.lower(), set()))
 
     def clear(self):

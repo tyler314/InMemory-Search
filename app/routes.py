@@ -3,8 +3,10 @@ from fastapi.responses import JSONResponse
 from app.db import InMemoryDB
 from app.models import Document, DocumentIdList
 
+THRESHOLD = 75
+
 router = APIRouter()
-db = InMemoryDB()
+db = InMemoryDB(partial_ratio_threshold=THRESHOLD)
 
 
 @router.post("/documents/{document_id}")
@@ -37,6 +39,6 @@ def delete_document():
 
 
 @router.get("/search")
-def search_by_keyword(keyword: str):
-    doc_ids = db.get_doc_ids_by_keyword(keyword)
+def search_by_keyword(keyword: str, fuzzy: str = "off"):
+    doc_ids = db.get_doc_ids_by_keyword(keyword, fuzzy=True if fuzzy == "on" else False)
     return DocumentIdList(status=200, total=len(doc_ids), document_ids=doc_ids)
